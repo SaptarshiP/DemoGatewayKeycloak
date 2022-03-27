@@ -1,0 +1,53 @@
+server:
+  port: 8092
+spring:  cloud:
+    gateway:
+      routes:
+       - id: customerModule
+         uri:  http://localhost:8093/
+         predicates:
+         - Path= /applicationController/**
+      discovery:
+        locator:
+          enabled: true
+      globalcors:
+        cors-configurations:
+          '[/**]':
+           allowedOrigins: "*"
+           allowedMethods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+  security:
+    oauth2:
+      client:
+          registration:
+            keycloak:
+              provider: keycloak
+              client-id: gateway-client1
+              client-secret: 2btDr6gTcaSzy2NchuIdMIgJODniV6it
+              #authorization-grant-type: password
+              redirect-uri: http://localhost:8092/login/oauth2/code/keycloak
+              scope: openid
+          provider:
+            keycloak:
+              issuer-uri: http://localhost:8080/realms/checkRealm1
+              authorization-uri: http://localhost:8080/realms/checkRealm1/protocol/openid-connect/auth
+              token-uri: http://localhost:8080/realms/checkRealm1/protocol/openid-connect/token
+              user-info-uri: http://localhost:8080/realms/checkRealm1/protocol/openid-connect/userinfo
+              jwk-set-uri: http://localhost:8080/realms/checkRealm1/protocol/openid-connect/certs
+              user-name-attribute: name
+              user-info-authentication-method: header
+      resourceserver:
+          jwt:
+            jwk-set-uri: ${keycloak-client.server-url}/realms/${keycloak-client.realm}/protocol/openid-connect/certs
+keycloak-client:
+  server-url: http://localhost:8080/
+  realm: checkRealm1
+#keycloak:
+#  realm: checkRealm1
+#  resource: gateway-client1
+#  auth-server-url: http://localhost:8080/
+#  ssl-required: external
+#  public-client: false  
